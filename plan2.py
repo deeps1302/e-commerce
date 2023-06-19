@@ -9,7 +9,8 @@ class Product:
 
     def __lt__(self, other):
         return self.pid < other.pid
-
+    
+#to store the Product objects with their unique product id as the key
 class HashTable:
     def __init__(self):
         self.table = {}
@@ -23,6 +24,7 @@ class HashTable:
     def get(self, pid):
         return self.table.get(pid)
 
+#used for efficient storage and retrieval of sorted products with pid
 class BinarySearchTree:
     class Node:
         def __init__(self, value):
@@ -36,6 +38,7 @@ class BinarySearchTree:
     def compare(self,product1, product2):
         return product1.pid < product2.pid
 
+# used to add a new Product object to the binary search tree
     def add(self, value):
         if self.root is None:
             self.root = BinarySearchTree.Node(value)
@@ -54,6 +57,7 @@ class BinarySearchTree:
             else:
                 self.add1(node.right, value)
 
+# used to retrieve a Product object from the tree based on its pid value
     def get(self, value):
         return self.get1(self.root, value)
 
@@ -80,6 +84,7 @@ class BinarySearchTree:
             result += self.inorder1(node.right)
         return result
 
+#Used to implement a shopping cart as a linked list of Product objects
 class LinkedList:
     class Node:
         def __init__(self, value):
@@ -104,34 +109,6 @@ class LinkedList:
             yield current.value
             current = current.next
 
-class Graph:
-    def __init__(self):
-        self.nodes = set()
-        self.edges = {}
-        self.weights = {}
-
-    def add_node(self, value):
-        self.nodes.add(value)
-
-    def add_edge(self, from_node, to_node, weight=1):
-        if from_node in self.edges:
-            self.edges[from_node].append(to_node)
-        else:
-            self.edges[from_node] = [to_node]
-        self.weights[(from_node, to_node)] = weight
-
-    def get_recommendations(self, value):
-        recommendations = set()
-        visited = set()
-        stack = [value]
-        while stack:
-            node = stack.pop()
-            visited.add(node)
-            for neighbor in self.edges.get(node, []):
-                if neighbor not in visited:
-                    stack.append(neighbor)
-                    recommendations.add(neighbor)
-        return recommendations
 
 class Transaction:
     def __init__(self, products):
@@ -152,24 +129,39 @@ class ECommercePlatform:
     def __init__(self):
         self.product_table = HashTable()
         self.product_tree = BinarySearchTree()
-        self.users = [User("Dharsan", "dharsan11@gmail.com","123")]
+        self.users = [User("Dharsan", "dharsan11@gmail.com","123"),
+                      User("Deepthika", "deepti123@gmail.com","000")]
         self.current_user = None
         self.current_transaction = None
 
-    def run(self):
-        self.add1_sample_products()
+    def add_sample_products(self):
+        products = [
+            Product("pid001", "Product 1", 10.0, stock=100),
+            Product("pid002", "Product 2", 20.0, stock=50),
+            Product("pid003", "Product 3", 30.0, stock=75),
+            Product("pid004", "Product 4", 40.0, stock=25),
+            Product("pid005", "Product 5", 50.0, stock=200),
+            Product("pid006", "Product 6", 60.0, stock=150),
+            Product("pid007", "Product 7", 70.0, stock=100),
+            Product("pid008", "Product 8", 80.0, stock=50),
+            Product("pid009", "Product 9", 90.0, stock=25),
+            Product("pid010", "Product 10", 100.0, stock=200)
+        ]
+        for product in products:
+            self.product_table.add(product.pid, product)
+            self.product_tree.add(product)
 
         while True:
-            self._display_main_menu()
+            self.main_menu()
             choice = input("Enter your choice: ")
             if choice == "1":
-                self.add1_product()
+                self.add_product()
             elif choice == "2":
                 self.view_products()
             elif choice == "3":
                 self.search_product_by_pid()
             elif choice == "4":
-                self.add1_to_cart()
+                self.add_to_cart()
             elif choice == "5":
                 self.view_cart()
             elif choice == "6":
@@ -187,24 +179,8 @@ class ECommercePlatform:
             else:
                 print("Invalid choice. Please try again.")
 
-    def add1_sample_products(self):
-        products = [
-            Product("pid001", "Product 1", 10.0, stock=100),
-            Product("pid002", "Product 2", 20.0, stock=50),
-            Product("pid003", "Product 3", 30.0, stock=75),
-            Product("pid004", "Product 4", 40.0, stock=25),
-            Product("pid005", "Product 5", 50.0, stock=200),
-            Product("pid006", "Product 6", 60.0, stock=150),
-            Product("pid007", "Product 7", 70.0, stock=100),
-            Product("pid008", "Product 8", 80.0, stock=50),
-            Product("pid009", "Product 9", 90.0, stock=25),
-            Product("pid010", "Product 10", 100.0, stock=200),
-        ]
-        for product in products:
-            self.product_table.add(product.pid, product)
-            self.product_tree.add(product)
-
-    def _display_main_menu(self):
+    def main_menu(self):
+        print("************************************************************************************************")
         print("Main Menu")
         print("1. Add a product")
         print("2. View all products")
@@ -218,8 +194,10 @@ class ECommercePlatform:
             print("7. Login")
             print("8. Register")
         print("9. Exit")
+        print("************************************************************************************************")
 
-    def add1_product(self):
+
+    def add_product(self):
         pid = input("Enter the pid: ")
         name = input("Enter the name: ")
         price = float(input("Enter the price: "))
@@ -243,7 +221,7 @@ class ECommercePlatform:
         else:
             print("Product not found.")
 
-    def add1_to_cart(self):
+    def add_to_cart(self):
         if not self.current_user:
             print("Please login first.")
             return
@@ -256,22 +234,22 @@ class ECommercePlatform:
 
         product = None
         if len(products) == 1:
-            product = products[0]
+          product = products[0]
         else:
-            for p in products:
-                if p.stock > 0:
-                    product = p
-                    break
-            if not product:
-                print("Product out of stock.")
-                return
+          for p in products:
+            if p.stock > 0:
+                product = p
+                break
+          if not product:
+            print("Product out of stock.")
+            return
 
         if self.current_transaction is None:
-            self.current_transaction = Transaction([])
-        self.current_transaction.products.append(product)
+           self.current_transaction = Transaction(LinkedList())  # Use empty LinkedList to store products
+        self.current_transaction.products.add(product)  # Add product to the linked list
         product.stock -= 1
         print("Product added to cart.")
-
+    
     def view_cart(self):
         if not self.current_user:
             print("Please login first.")
@@ -325,4 +303,4 @@ class ECommercePlatform:
         sys.exit()
 
 platform = ECommercePlatform()
-platform.run()
+platform.add_sample_products()
